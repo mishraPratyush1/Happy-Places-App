@@ -1,4 +1,4 @@
-package com.example.happyplaces
+package com.example.happyplaces.activities
 
 
 import android.app.Activity
@@ -14,12 +14,14 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
-import android.support.v4.os.IResultReceiver._Parcel
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.happyplaces.R
+import com.example.happyplaces.database.DatabaseHandler
 import com.example.happyplaces.databinding.ActivityAddHappyPlaceBinding
+import com.example.happyplaces.models.HappyPlaceModel
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -27,10 +29,8 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOError
 import java.io.IOException
 import java.io.OutputStream
-import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,6 +38,11 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
     private var viewBinding : ActivityAddHappyPlaceBinding? = null
     private var calender = Calendar.getInstance()
     private lateinit var dateSetListener: OnDateSetListener
+
+    private var saveImageToInternalStorage : Uri? = null
+    private var mlatitude : Double = 0.0
+    private var mlongitude : Double = 0.0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityAddHappyPlaceBinding.inflate(layoutInflater)
@@ -56,8 +61,10 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
 
             UpdateDateInView()
         }
+        UpdateDateInView()
         viewBinding?.etDate?.setOnClickListener(this)
         viewBinding?.tvAddImage?.setOnClickListener(this)
+        viewBinding?.btnSave?.setOnClickListener(this)
     }
 
     override fun onClick(v: View?) {
@@ -85,6 +92,42 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 pictureDialog.show()
             }
+            R.id.btn_save -> {
+                //store Data Model to Database
+                when{
+                    viewBinding?.etTitle?.text.isNullOrEmpty() -> {
+                        Toast.makeText(this@AddHappyPlaceActivity,"Please Enter Title",Toast.LENGTH_LONG).show()
+                    }
+                    viewBinding?.etDescription?.text.isNullOrEmpty() -> {
+                        Toast.makeText(this@AddHappyPlaceActivity,"Please Enter Description",Toast.LENGTH_LONG).show()
+                    }
+                    viewBinding?.etLocation?.text.isNullOrEmpty() -> {
+                        Toast.makeText(this@AddHappyPlaceActivity,"Please Enter Location",Toast.LENGTH_LONG).show()
+                    }
+                    saveImageToInternalStorage == null -> {
+                        Toast.makeText(this@AddHappyPlaceActivity,"Please Upload Image",Toast.LENGTH_LONG).show()
+                    }else ->{
+                        val happyPlaceModel = HappyPlaceModel(
+                            0,
+                            viewBinding?.etTitle?.text.toString(),
+                            saveImageToInternalStorage.toString(),
+                            viewBinding?.etDescription?.text.toString(),
+                            viewBinding?.etDate?.text.toString(),
+                            viewBinding?.etLocation?.text.toString(),
+                            mlatitude,
+                            mlongitude,
+                        )
+
+                        val dbHandler = DatabaseHandler(this)
+                        val addHappyPlace : Long = dbHandler.addHappyPlace(happyPlaceModel)
+                        if(addHappyPlace > 0){
+                            Toast.makeText(this@AddHappyPlaceActivity,"Details Uploaded Successfully",Toast.LENGTH_LONG).show()
+                            finish()
+                        }
+                    }
+                }
+
+            }
         }
     }
     private fun takePhotosFromCamera(){
@@ -96,7 +139,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             override fun onPermissionsChecked(p0: MultiplePermissionsReport?) {
                 if(p0!!.areAllPermissionsGranted()){
                     val galleryIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    startActivityForResult(galleryIntent,CAMERA)
+                    startActivityForResult(galleryIntent, CAMERA)
                 }
             }
 
@@ -116,7 +159,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             override fun onPermissionsChecked(p0: MultiplePermissionsReport?) {
                 if(p0!!.areAllPermissionsGranted()){
                     val galleryIntent = Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                    startActivityForResult(galleryIntent,GALLERY)
+                    startActivityForResult(galleryIntent, GALLERY)
                 }
             }
 
@@ -137,7 +180,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                         var contentURI = data.data
                         try {
                             val selectedImageBitMap = MediaStore.Images.Media.getBitmap(this.contentResolver,contentURI)
-                            val saveImageToInternalStorage = saveImageToInternalStorage(selectedImageBitMap)
+                            saveImageToInternalStorage = saveImageToInternalStorage(selectedImageBitMap)
                             Log.e("", "Path : $saveImageToInternalStorage")
                             viewBinding?.ivPlaceImage!!.setImageBitmap(selectedImageBitMap)
                         }catch (e : IOException){
@@ -148,7 +191,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                     }
             }else if(requestCode == CAMERA){
                 val thumbnail : Bitmap = data!!.extras!!.get("data") as Bitmap
-                val saveImageToInternalStorage = saveImageToInternalStorage(thumbnail)
+                saveImageToInternalStorage = saveImageToInternalStorage(thumbnail)
                 Log.e("", "Path : $saveImageToInternalStorage")
                 viewBinding?.ivPlaceImage!!.setImageBitmap(thumbnail)
 
