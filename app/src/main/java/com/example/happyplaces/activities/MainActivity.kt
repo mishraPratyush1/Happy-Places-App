@@ -1,12 +1,17 @@
 package com.example.happyplaces.activities
 
+import SwipeToEditCallback
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.example.happyplaces.database.DatabaseHandler
 import com.example.happyplaces.databinding.ActivityMainBinding
 import com.example.happyplaces.models.HappyPlaceModel
@@ -56,6 +61,21 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
+
+        val editSwipeHandler = object : SwipeToEditCallback(this){
+            @SuppressLint("SuspiciousIndentation")
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+
+            val adapter = viewBinding?.rvHappyPlacesList?.adapter as HappyPlacesAdapter
+
+                adapter.notifyEditItem(
+                    this@MainActivity,viewHolder.adapterPosition,
+                    ADD_PLACE_ACTIVITY_REQUEST_CODE)
+            }
+        }
+
+        val editItemTouchHelper = ItemTouchHelper(editSwipeHandler)
+        editItemTouchHelper.attachToRecyclerView(viewBinding?.rvHappyPlacesList)
     }
 
     @Deprecated("Deprecated in Java")

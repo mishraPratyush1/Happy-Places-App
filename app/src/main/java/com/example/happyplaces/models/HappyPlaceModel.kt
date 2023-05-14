@@ -11,4 +11,4 @@ data class HappyPlaceModel(
     val longitude : Double
 ) : java.io.Serializable
 
-//will bring it to format which we can pass from one class to other in intent
+//Serializable will bring it to format which we can pass from one class to other in intent

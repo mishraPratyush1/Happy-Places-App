@@ -43,6 +43,8 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
     private var mlatitude : Double = 0.0
     private var mlongitude : Double = 0.0
 
+    private var happyPlaceDetails : HappyPlaceModel? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityAddHappyPlaceBinding.inflate(layoutInflater)
@@ -54,6 +56,10 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             onBackPressed()
         }
 
+        if(intent.hasExtra(MainActivity.EXTRA_PLACE_DETAILS)){
+            happyPlaceDetails = intent.getSerializableExtra(MainActivity.EXTRA_PLACE_DETAILS) as HappyPlaceModel
+        }
+
         dateSetListener = DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
             calender.set(Calendar.YEAR,year)
             calender.set(Calendar.MONTH,month)
@@ -62,6 +68,22 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             UpdateDateInView()
         }
         UpdateDateInView()
+
+        if(happyPlaceDetails != null){
+            supportActionBar?.title = "Edit Happy Place"
+            viewBinding?.etTitle?.setText(happyPlaceDetails!!.title)
+            viewBinding?.etDescription?.setText(happyPlaceDetails!!.description)
+            viewBinding?.etDate?.setText(happyPlaceDetails!!.date)
+            viewBinding?.etLocation?.setText(happyPlaceDetails!!.location)
+            mlatitude = happyPlaceDetails!!.latitude
+            mlongitude = happyPlaceDetails!!.longitude
+
+            saveImageToInternalStorage = Uri.parse(happyPlaceDetails!!.image)
+
+            viewBinding?.ivPlaceImage?.setImageURI(saveImageToInternalStorage)
+
+            viewBinding?.btnSave?.text = "UPDATE"
+        }
         viewBinding?.etDate?.setOnClickListener(this)
         viewBinding?.tvAddImage?.setOnClickListener(this)
         viewBinding?.btnSave?.setOnClickListener(this)
