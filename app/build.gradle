@@ -50,4 +50,7 @@ dependencies {
     implementation 'com.karumi:dexter:6.2.3'
     implementation 'com.android.databinding:viewbinding:7.2.2'
 
+    //circular image view 3rd party library
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+
 }

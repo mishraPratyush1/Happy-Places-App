@@ -121,7 +121,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                         val dbHandler = DatabaseHandler(this)
                         val addHappyPlace : Long = dbHandler.addHappyPlace(happyPlaceModel)
                         if(addHappyPlace > 0){
-                            Toast.makeText(this@AddHappyPlaceActivity,"Details Uploaded Successfully",Toast.LENGTH_LONG).show()
+                            setResult(Activity.RESULT_OK)
                             finish()
                         }
                     }

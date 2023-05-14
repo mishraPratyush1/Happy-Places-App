@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:allowBackup="true"
@@ -16,11 +16,16 @@
         android:theme="@style/Theme.HappyPlaces"
         tools:targetApi="31">
         <activity
+            android:name=".activities.HappyPlaceDetailsActivity"
+            android:exported="false"
+            android:label="Happy Place Details"
             android:screenOrientation="fullSensor"
-            android:label="Add Happy Place"
-            android:theme="@style/CustomNoActionBarTheme"
+            android:theme="@style/CustomNoActionBarTheme" />
+        <activity
             android:name=".activities.AddHappyPlaceActivity"
-            />
+            android:label="Add Happy Place"
+            android:screenOrientation="fullSensor"
+            android:theme="@style/CustomNoActionBarTheme" />
         <activity
             android:name=".activities.MainActivity"
             android:exported="true">
